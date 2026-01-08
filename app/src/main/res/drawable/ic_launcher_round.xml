@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    
+    <!-- Background circle -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M24,0C10.75,0 0,10.75 0,24C0,37.25 10.75,48 24,48C37.25,48 48,37.25 48,24C48,10.75 37.25,0 24,0Z"/>
+    
+    <!-- NFC Icon - Outer ring -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,12C17.37,12 12,17.37 12,24C12,30.63 17.37,36 24,36C30.63,36 36,30.63 36,24C36,17.37 30.63,12 24,12ZM24,33.6C18.7,33.6 14.4,29.3 14.4,24C14.4,18.7 18.7,14.4 24,14.4C29.3,14.4 33.6,18.7 33.6,24C33.6,29.3 29.3,33.6 24,33.6Z"/>
+    
+    <!-- NFC Icon - Middle ring -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,16.8C20.02,16.8 16.8,20.02 16.8,24C16.8,27.98 20.02,31.2 24,31.2C27.98,31.2 31.2,27.98 31.2,24C31.2,20.02 27.98,16.8 24,16.8ZM24,28.8C21.35,28.8 19.2,26.65 19.2,24C19.2,21.35 21.35,19.2 24,19.2C26.65,19.2 28.8,21.35 28.8,24C28.8,26.65 26.65,28.8 24,28.8Z"/>
+    
+    <!-- NFC Icon - Center dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,21.6C22.68,21.6 21.6,22.68 21.6,24C21.6,25.32 22.68,26.4 24,26.4C25.32,26.4 26.4,25.32 26.4,24C26.4,22.68 25.32,21.6 24,21.6Z"/>
+    
+</vector>
