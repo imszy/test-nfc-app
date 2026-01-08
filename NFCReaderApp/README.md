@@ -78,6 +78,8 @@ app/
 
 ## 构建说明
 
+### 本地构建
+
 1. 克隆项目
 2. 使用Android Studio打开 `NFCReaderApp` 目录
 3. 同步Gradle依赖
@@ -86,6 +88,38 @@ app/
 
 ```bash
 ./gradlew assembleDebug
+```
+
+### GitHub Actions 自动构建
+
+本项目已配置 GitHub Actions，支持自动构建：
+
+#### 自动触发
+- **推送代码**: 推送到 `main`、`master` 或 `develop` 分支时自动构建
+- **Pull Request**: 向 `main` 或 `master` 分支提交 PR 时自动构建
+- **发布版本**: 推送 `v*` 格式的 tag 时自动创建 Release（如 `v1.0.0`）
+
+#### 手动触发
+1. 进入 GitHub 仓库的 **Actions** 页面
+2. 选择 **Android Build** 或 **Release Build** 工作流
+3. 点击 **Run workflow** 按钮
+
+#### 下载 APK
+1. 构建完成后，进入对应的 workflow run
+2. 在 **Artifacts** 部分下载：
+   - `app-debug` - Debug 版本 APK
+   - `app-release-unsigned` - 未签名的 Release 版本 APK
+
+#### 配置签名（可选）
+如需自动签名 Release APK，在仓库 Settings > Secrets 中添加：
+- `KEYSTORE_BASE64`: keystore 文件的 Base64 编码
+- `KEYSTORE_PASSWORD`: keystore 密码
+- `KEY_ALIAS`: 密钥别名
+- `KEY_PASSWORD`: 密钥密码
+
+生成 Base64 编码：
+```bash
+base64 -i your-keystore.jks | tr -d '\n'
 ```
 
 ## 权限说明
