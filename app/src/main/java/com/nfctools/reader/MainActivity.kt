@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
         pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
         } else {
-            PendingIntent.getActivity(this, 0, intent, 0)
+            @Suppress("DEPRECATION")
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
         
         // 设置Intent过滤器
