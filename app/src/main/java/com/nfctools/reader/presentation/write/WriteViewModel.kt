@@ -58,9 +58,9 @@ class WriteViewModel @Inject constructor(
     )
     
     init {
-        // 设置默认编码
+        // 设置默认编码（只在初始化时设置一次）
         viewModelScope.launch {
-            preferencesManager.preferences.collect { prefs ->
+            preferencesManager.preferences.first().let { prefs ->
                 _uiState.update { it.copy(encoding = prefs.defaultEncoding) }
             }
         }

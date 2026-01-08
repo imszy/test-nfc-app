@@ -110,45 +110,14 @@ class NfcRepositoryImpl @Inject constructor() : NfcRepository {
             val ndef = Ndef.get(tag)
             
             if (ndef != null) {
-                ndef.connect()
-                
-                if (!ndef.isWritable) {
-                    ndef.close()
-                    return@withContext Result.failure(Exception("标签不可写"))
-                }
-                
-                // 创建NDEF记录
-                val ndefRecord = when (data.type) {
-                    WriteType.TEXT -> createTextRecord(data.content, data.encoding)
-                    WriteType.URL -> createUriRecord(data.content)
-                    WriteType.FILE -> createMimeRecord(data.content, "application/octet-stream")
-                    WriteType.CUSTOM -> createTextRecord(data.content, data.encoding)
-                }
-                
-                val ndefMessage = NdefMessage(arrayOf(ndefRecord))
-                
-                // 检查容量
-                if (ndefMessage.byteArrayLength > ndef.maxSize) {
-                    ndef.close()
-                    return@withContext Result.failure(Exception("数据超出标签容量"))
-                }
-                
-                // 写入数据
-                ndef.writeNdefMessage(ndefMessage)
-                
-                // 如果需要锁定标签
-                if (data.lockTag) {
-                    ndef.makeReadOnly()
-                }
-                
-                ndef.close()
-                Result.success(true)
-            } else {
-                // 尝试格式化标签
-                val ndefFormatable = NdefFormatable.get(tag)
-                if (ndefFormatable != null) {
-                    ndefFormatable.connect()
+                try {
+                    ndef.connect()
                     
+                    if (!ndef.isWritable) {
+                        return@withContext Result.failure(Exception("标签不可写"))
+                    }
+                    
+                    // 创建NDEF记录
                     val ndefRecord = when (data.type) {
                         WriteType.TEXT -> createTextRecord(data.content, data.encoding)
                         WriteType.URL -> createUriRecord(data.content)
@@ -158,14 +127,57 @@ class NfcRepositoryImpl @Inject constructor() : NfcRepository {
                     
                     val ndefMessage = NdefMessage(arrayOf(ndefRecord))
                     
-                    if (data.lockTag) {
-                        ndefFormatable.formatReadOnly(ndefMessage)
-                    } else {
-                        ndefFormatable.format(ndefMessage)
+                    // 检查容量
+                    if (ndefMessage.byteArrayLength > ndef.maxSize) {
+                        return@withContext Result.failure(Exception("数据超出标签容量"))
                     }
                     
-                    ndefFormatable.close()
+                    // 写入数据
+                    ndef.writeNdefMessage(ndefMessage)
+                    
+                    // 如果需要锁定标签
+                    if (data.lockTag) {
+                        ndef.makeReadOnly()
+                    }
+                    
                     Result.success(true)
+                } finally {
+                    try {
+                        ndef.close()
+                    } catch (e: Exception) {
+                        // Ignore close exception
+                    }
+                }
+            } else {
+                // 尝试格式化标签
+                val ndefFormatable = NdefFormatable.get(tag)
+                if (ndefFormatable != null) {
+                    try {
+                        ndefFormatable.connect()
+                        
+                        val ndefRecord = when (data.type) {
+                            WriteType.TEXT -> createTextRecord(data.content, data.encoding)
+                            WriteType.URL -> createUriRecord(data.content)
+                            WriteType.FILE -> createMimeRecord(data.content, "application/octet-stream")
+                            WriteType.CUSTOM -> createTextRecord(data.content, data.encoding)
+                        }
+                        
+                        val ndefMessage = NdefMessage(arrayOf(ndefRecord))
+                        
+                        if (data.lockTag) {
+                            ndefFormatable.formatReadOnly(ndefMessage)
+                        } else {
+                            ndefFormatable.format(ndefMessage)
+                        }
+                        
+                        Result.success(true)
+                    } finally {
+                        try {
+                            ndefFormatable.close()
+                        } catch (e: Exception) {
+                            // Ignore close exception
+                        }
+                    }
                 } else {
                     Result.failure(Exception("标签不支持NDEF格式"))
                 }
@@ -181,26 +193,32 @@ class NfcRepositoryImpl @Inject constructor() : NfcRepository {
                 Exception("标签不支持NDEF格式")
             )
             
-            ndef.connect()
-            
-            if (!ndef.isWritable) {
-                ndef.close()
-                return@withContext Result.failure(Exception("标签不可写"))
+            try {
+                ndef.connect()
+                
+                if (!ndef.isWritable) {
+                    return@withContext Result.failure(Exception("标签不可写"))
+                }
+                
+                // 创建空的NDEF消息
+                val emptyRecord = NdefRecord(
+                    NdefRecord.TNF_EMPTY,
+                    ByteArray(0),
+                    ByteArray(0),
+                    ByteArray(0)
+                )
+                val emptyMessage = NdefMessage(arrayOf(emptyRecord))
+                
+                ndef.writeNdefMessage(emptyMessage)
+                
+                Result.success(true)
+            } finally {
+                try {
+                    ndef.close()
+                } catch (e: Exception) {
+                    // Ignore close exception
+                }
             }
-            
-            // 创建空的NDEF消息
-            val emptyRecord = NdefRecord(
-                NdefRecord.TNF_EMPTY,
-                ByteArray(0),
-                ByteArray(0),
-                ByteArray(0)
-            )
-            val emptyMessage = NdefMessage(arrayOf(emptyRecord))
-            
-            ndef.writeNdefMessage(emptyMessage)
-            ndef.close()
-            
-            Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -212,20 +230,27 @@ class NfcRepositoryImpl @Inject constructor() : NfcRepository {
                 Exception("标签不支持格式化")
             )
             
-            ndefFormatable.connect()
-            
-            val emptyRecord = NdefRecord(
-                NdefRecord.TNF_EMPTY,
-                ByteArray(0),
-                ByteArray(0),
-                ByteArray(0)
-            )
-            val emptyMessage = NdefMessage(arrayOf(emptyRecord))
-            
-            ndefFormatable.format(emptyMessage)
-            ndefFormatable.close()
-            
-            Result.success(true)
+            try {
+                ndefFormatable.connect()
+                
+                val emptyRecord = NdefRecord(
+                    NdefRecord.TNF_EMPTY,
+                    ByteArray(0),
+                    ByteArray(0),
+                    ByteArray(0)
+                )
+                val emptyMessage = NdefMessage(arrayOf(emptyRecord))
+                
+                ndefFormatable.format(emptyMessage)
+                
+                Result.success(true)
+            } finally {
+                try {
+                    ndefFormatable.close()
+                } catch (e: Exception) {
+                    // Ignore close exception
+                }
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

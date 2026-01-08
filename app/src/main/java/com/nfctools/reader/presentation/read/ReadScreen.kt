@@ -89,7 +89,7 @@ fun ReadScreen(
             text = { Text("确定要擦除此标签的所有数据吗？此操作不可撤销。") },
             confirmButton = {
                 Button(
-                    onClick = { viewModel.hideEraseDialog() },
+                    onClick = { viewModel.eraseCurrentTag() },  // 修复：调用擦除方法
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
                     )

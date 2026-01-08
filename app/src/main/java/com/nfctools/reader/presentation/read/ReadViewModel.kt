@@ -30,6 +30,7 @@ import javax.inject.Inject
 data class ReadUiState(
     val isScanning: Boolean = true,
     val tagData: NfcTagData? = null,
+    val currentTag: Tag? = null,  // 保存当前标签引用，用于擦除操作
     val selectedTab: Int = 0,
     val error: String? = null,
     val showEraseDialog: Boolean = false
@@ -80,6 +81,7 @@ class ReadViewModel @Inject constructor(
                         it.copy(
                             isScanning = false,
                             tagData = tagData,
+                            currentTag = tag,  // 保存当前标签引用
                             error = null
                         )
                     }
@@ -165,7 +167,16 @@ class ReadViewModel @Inject constructor(
         _uiState.update { it.copy(showEraseDialog = false) }
     }
     
-    fun eraseTag(tag: Tag) {
+    fun eraseCurrentTag() {
+        val tag = _uiState.value.currentTag
+        if (tag == null) {
+            viewModelScope.launch {
+                _uiState.update { it.copy(showEraseDialog = false) }
+                _snackbarMessage.emit("擦除失败: 请重新扫描标签")
+            }
+            return
+        }
+        
         viewModelScope.launch {
             _uiState.update { it.copy(showEraseDialog = false) }
             
