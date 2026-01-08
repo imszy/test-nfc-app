@@ -67,13 +67,13 @@ fun SettingsScreen(
                         description = "允许应用使用NFC功能",
                         enabled = uiState.nfcPermissionGranted
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     PermissionItem(
                         title = "存储权限",
                         description = "用于保存历史记录",
                         enabled = uiState.storagePermissionGranted
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     PermissionItem(
                         title = "通知权限",
                         description = "接收读写操作通知",
@@ -90,26 +90,26 @@ fun SettingsScreen(
                         checked = preferences.autoRead,
                         onCheckedChange = { viewModel.setAutoRead(it) }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     SwitchItem(
                         title = "振动反馈",
                         checked = preferences.vibrationFeedback,
                         onCheckedChange = { viewModel.setVibrationFeedback(it) }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     SwitchItem(
                         title = "声音提示",
                         checked = preferences.soundFeedback,
                         onCheckedChange = { viewModel.setSoundFeedback(it) }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     
                     EncodingDropdownItem(
                         selectedEncoding = preferences.defaultEncoding,
                         onEncodingSelected = { viewModel.setDefaultEncoding(it) }
                     )
                     
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     
                     RetentionDaysItem(
                         days = preferences.historyRetentionDays,
@@ -122,9 +122,9 @@ fun SettingsScreen(
             item {
                 SettingsSection(title = "关于应用") {
                     InfoItem(label = "应用版本", value = "v1.0.0")
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     InfoItem(label = "构建日期", value = "2025-01-08")
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
                     InfoItem(label = "开发者", value = "NFC Tools Team")
                 }
             }

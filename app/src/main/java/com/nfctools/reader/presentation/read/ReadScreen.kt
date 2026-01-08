@@ -145,7 +145,7 @@ private fun TagDataView(
                     onCopy = { onCopy(tagData.id) }
                 )
                 
-                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.small))
+                Divider(modifier = Modifier.padding(vertical = Spacing.small))
                 
                 // 标签类型
                 TagInfoRow(
@@ -154,7 +154,7 @@ private fun TagDataView(
                     isBadge = true
                 )
                 
-                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.small))
+                Divider(modifier = Modifier.padding(vertical = Spacing.small))
                 
                 // 容量信息
                 TagInfoRow(
@@ -162,7 +162,7 @@ private fun TagDataView(
                     value = tagData.capacity
                 )
                 
-                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.small))
+                Divider(modifier = Modifier.padding(vertical = Spacing.small))
                 
                 // 可写状态
                 TagInfoRow(

@@ -26,6 +26,7 @@ import com.nfctools.reader.presentation.components.*
 import com.nfctools.reader.presentation.theme.*
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteScreen(
     navController: NavController,
@@ -216,6 +217,7 @@ private fun SegmentedControl(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TextModeForm(
     textContent: String,

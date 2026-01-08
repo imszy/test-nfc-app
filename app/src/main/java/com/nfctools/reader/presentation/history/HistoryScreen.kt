@@ -2,6 +2,7 @@ package com.nfctools.reader.presentation.history
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -235,106 +236,115 @@ private fun FilterBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HistoryItem(
     history: HistoryEntity,
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else {
-                false
-            }
-        }
-    )
+    var showDeleteConfirm by remember { mutableStateOf(false) }
     
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.error)
-                    .padding(horizontal = Spacing.large),
-                contentAlignment = Alignment.CenterEnd
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(Radius.card)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.large),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 类型图标
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
+                color = if (history.type == HistoryType.READ)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    SecondaryContainer
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "删除",
-                    tint = Color.White
+                    imageVector = if (history.type == HistoryType.READ)
+                        Icons.Outlined.Label
+                    else
+                        Icons.Outlined.Edit,
+                    contentDescription = null,
+                    modifier = Modifier.padding(Spacing.small),
+                    tint = if (history.type == HistoryType.READ)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        Secondary
                 )
             }
-        },
-        content = {
-            Card(
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp),
-                shape = RoundedCornerShape(Radius.card)
+            
+            // 内容
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = history.tagId,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = history.content.ifEmpty { "无内容" },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // 时间
+            Text(
+                text = history.timestamp.toTimeString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            // 删除按钮
+            IconButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.size(32.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Spacing.large),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.large)
-                ) {
-                    // 类型图标
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = if (history.type == HistoryType.READ)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            SecondaryContainer
-                    ) {
-                        Icon(
-                            imageVector = if (history.type == HistoryType.READ)
-                                Icons.Outlined.Label
-                            else
-                                Icons.Outlined.Edit,
-                            contentDescription = null,
-                            modifier = Modifier.padding(Spacing.small),
-                            tint = if (history.type == HistoryType.READ)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                Secondary
-                        )
-                    }
-                    
-                    // 内容
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = history.tagId,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = history.content.ifEmpty { "无内容" },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    
-                    // 时间
-                    Text(
-                        text = history.timestamp.toTimeString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "删除",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+    
+    // 删除确认对话框
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("删除记录") },
+            text = { Text("确定要删除这条记录吗？") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete()
+                        showDeleteConfirm = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
                     )
+                ) {
+                    Text("删除")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("取消")
                 }
             }
-        },
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true
-    )
+        )
+    }
 }
 
 @Composable

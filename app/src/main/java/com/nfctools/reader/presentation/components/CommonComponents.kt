@@ -312,7 +312,7 @@ fun WriteAnimation(
             Spacer(modifier = Modifier.height(Spacing.large))
             
             LinearProgressIndicator(
-                progress = { progress },
+                progress = progress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp),
