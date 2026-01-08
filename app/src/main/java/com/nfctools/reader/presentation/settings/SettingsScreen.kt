@@ -1,6 +1,8 @@
 package com.nfctools.reader.presentation.settings
 
+import android.app.Activity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -11,14 +13,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.nfctools.reader.R
 import com.nfctools.reader.domain.model.Encoding
 import com.nfctools.reader.presentation.components.*
 import com.nfctools.reader.presentation.theme.*
+import com.nfctools.reader.util.PlayStoreUtils
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
@@ -28,6 +35,8 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val preferences by viewModel.preferences.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     
     LaunchedEffect(Unit) {
         viewModel.checkNFCStatus()
@@ -129,14 +138,81 @@ fun SettingsScreen(
                 }
             }
             
+            // 隐私与法律
+            item {
+                SettingsSection(title = "隐私与法律") {
+                    ClickableItem(
+                        title = stringResource(R.string.privacy_policy),
+                        icon = Icons.Outlined.PrivacyTip,
+                        onClick = {
+                            PlayStoreUtils.openPrivacyPolicy(
+                                context,
+                                context.getString(R.string.privacy_policy_url)
+                            )
+                        }
+                    )
+                    Divider(modifier = Modifier.padding(horizontal = Spacing.large))
+                    ClickableItem(
+                        title = stringResource(R.string.terms_of_service),
+                        icon = Icons.Outlined.Description,
+                        onClick = {
+                            PlayStoreUtils.openTermsOfService(
+                                context,
+                                context.getString(R.string.terms_url)
+                            )
+                        }
+                    )
+                }
+            }
+            
+            // 数据安全说明
+            item {
+                DataSafetyCard()
+            }
+            
             // 操作按钮
             item {
                 Column(
                     modifier = Modifier.padding(Spacing.large),
                     verticalArrangement = Arrangement.spacedBy(Spacing.medium)
                 ) {
+                    // 为应用评分
                     OutlinedButton(
-                        onClick = { viewModel.openHelp() },
+                        onClick = {
+                            scope.launch {
+                                (context as? Activity)?.let { activity ->
+                                    PlayStoreUtils.requestInAppReview(activity)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Outlined.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.small))
+                        Text(stringResource(R.string.rate_app))
+                    }
+                    
+                    // 分享应用
+                    OutlinedButton(
+                        onClick = { PlayStoreUtils.shareApp(context) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.small))
+                        Text(stringResource(R.string.share_app))
+                    }
+                    
+                    // 帮助与反馈
+                    OutlinedButton(
+                        onClick = { PlayStoreUtils.sendFeedback(context) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
@@ -145,9 +221,10 @@ fun SettingsScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(Spacing.small))
-                        Text("帮助与反馈")
+                        Text(stringResource(R.string.help_feedback))
                     }
                     
+                    // 清除历史记录
                     Button(
                         onClick = { viewModel.showClearHistoryDialog() },
                         modifier = Modifier.fillMaxWidth(),
@@ -161,7 +238,7 @@ fun SettingsScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(Spacing.small))
-                        Text("清除历史记录")
+                        Text(stringResource(R.string.clear_history))
                     }
                 }
             }
@@ -472,6 +549,113 @@ private fun InfoItem(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun ClickableItem(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = Spacing.large, vertical = Spacing.medium),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Icon(
+            imageVector = Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun DataSafetyCard() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.large, vertical = Spacing.small),
+        shape = RoundedCornerShape(Radius.card),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(Spacing.large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Security,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "数据安全",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            DataSafetyItem(
+                icon = Icons.Outlined.PersonOff,
+                text = stringResource(R.string.no_account_required)
+            )
+            DataSafetyItem(
+                icon = Icons.Outlined.PhoneAndroid,
+                text = stringResource(R.string.data_stored_locally)
+            )
+            DataSafetyItem(
+                icon = Icons.Outlined.Lock,
+                text = stringResource(R.string.no_data_shared)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DataSafetyItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
     }
 }

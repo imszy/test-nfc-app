@@ -1,0 +1,9 @@
+🎉 Initial Release v1.0.0
+
+• Read NFC tags with detailed information display
+• Write text, URLs, and custom data to NFC tags
+• History recording with filtering and search
+• Multiple encoding support (UTF-8, UTF-16, ASCII)
+• Vibration and sound feedback options
+• Dark and Light theme support
+• Privacy-focused: all data stored locally

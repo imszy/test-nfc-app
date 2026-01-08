@@ -100,6 +100,10 @@
     <string name="clear_history_confirm">确定要清除所有历史记录吗？此操作不可撤销。</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="terms_of_service">服务条款</string>
+    <string name="rate_app">为应用评分</string>
+    <string name="share_app">分享应用</string>
     
     <!-- 底部导航 -->
     <string name="nav_home">首页</string>
@@ -116,4 +120,12 @@
     <string name="error_connection_lost">连接中断，请重新靠近标签</string>
     <string name="error_read_failed">读取失败</string>
     <string name="error_write_failed">写入失败</string>
+    
+    <!-- 隐私与法律 -->
+    <string name="privacy_policy_url">https://nfctools.example.com/privacy</string>
+    <string name="terms_url">https://nfctools.example.com/terms</string>
+    <string name="data_collection_notice">本应用仅收集必要的功能数据。NFC标签数据存储在您的设备本地。</string>
+    <string name="no_account_required">无需注册账号</string>
+    <string name="data_stored_locally">所有数据存储在您的设备本地</string>
+    <string name="no_data_shared">不与第三方共享数据</string>
 </resources>

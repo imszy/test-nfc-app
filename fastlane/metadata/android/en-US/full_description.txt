@@ -1,0 +1,49 @@
+NFC Reader & Writer is a powerful and easy-to-use tool for reading and writing NFC tags on your Android device.
+
+🔍 KEY FEATURES:
+
+📖 READ NFC TAGS
+• Instantly read any NFC tag content
+• Support for NDEF, MIFARE, and other tag types
+• View tag ID, type, capacity, and technology details
+• Display content in text, hexadecimal, or raw format
+• Copy and share tag information easily
+
+✏️ WRITE NFC TAGS
+• Write text, URLs, and custom data to NFC tags
+• Support for multiple character encodings (UTF-8, UTF-16, ASCII)
+• Preview data before writing
+• Lock tags to prevent future modifications (optional)
+• Password protection support
+
+📚 HISTORY & MANAGEMENT
+• Automatic history recording of all operations
+• Filter history by type (read/write) and time
+• Search and manage your NFC tag records
+• Export and share history data
+
+⚙️ CUSTOMIZATION
+• Auto-read mode for hands-free operation
+• Vibration and sound feedback options
+• Configurable history retention period
+• Dark/Light theme support
+
+🔒 PRIVACY & SECURITY
+• No account required
+• All data stored locally on your device
+• No data shared with third parties
+• Open source and transparent
+
+💡 PERFECT FOR:
+• Business card sharing via NFC
+• Smart home automation triggers
+• Inventory and asset management
+• Access control and authentication
+• IoT device configuration
+• Educational purposes
+
+📱 REQUIREMENTS:
+• Android device with NFC capability
+• Android 5.0 (Lollipop) or higher
+
+Download NFC Reader & Writer today and unlock the full potential of NFC technology!

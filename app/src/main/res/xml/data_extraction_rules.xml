@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Android 12+ 数据提取规则
+   参考: https://developer.android.com/about/versions/12/backup-restore
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- 包含用户偏好设置 -->
+        <include domain="sharedpref" path="." />
+        
+        <!-- 排除数据库 -->
+        <exclude domain="database" path="." />
+        
+        <!-- 排除缓存 -->
+        <exclude domain="cache" path="." />
+    </cloud-backup>
+    
+    <device-transfer>
+        <!-- 设备传输时包含所有数据 -->
+        <include domain="sharedpref" path="." />
+        <include domain="database" path="." />
+        
+        <!-- 排除缓存 -->
+        <exclude domain="cache" path="." />
+    </device-transfer>
+</data-extraction-rules>

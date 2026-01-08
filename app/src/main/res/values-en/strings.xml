@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NFC Reader &amp; Writer</string>
+    
+    <!-- Home -->
+    <string name="home_title">NFC Reader &amp; Writer</string>
+    <string name="nfc_status_enabled">NFC Enabled</string>
+    <string name="nfc_status_disabled">NFC Disabled</string>
+    <string name="nfc_hint">Hold your phone near an NFC tag to read</string>
+    
+    <!-- Feature Cards -->
+    <string name="func_read_tag">Read Tag</string>
+    <string name="func_read_desc">Scan NFC tag information</string>
+    <string name="func_write_text">Write Text</string>
+    <string name="func_write_text_desc">Write text to tag</string>
+    <string name="func_write_url">Write URL</string>
+    <string name="func_write_url_desc">Write link to tag</string>
+    <string name="func_write_file">Write File</string>
+    <string name="func_write_file_desc">Write file data to tag</string>
+    <string name="func_history">History</string>
+    <string name="func_history_desc">View operation history</string>
+    <string name="func_settings">Settings</string>
+    <string name="func_settings_desc">Permissions &amp; Configuration</string>
+    
+    <!-- Read Page -->
+    <string name="read_title">Read Tag</string>
+    <string name="scanning">Searching for tag…</string>
+    <string name="tag_info">Tag Information</string>
+    <string name="tag_id">Tag ID</string>
+    <string name="tag_type">Tag Type</string>
+    <string name="tag_capacity">Capacity</string>
+    <string name="tab_text">Text</string>
+    <string name="tab_hex">Hexadecimal</string>
+    <string name="tab_tech">Tech Details</string>
+    <string name="save_to_history">Save to History</string>
+    <string name="share">Share</string>
+    <string name="erase_tag">Erase Tag</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied to clipboard</string>
+    
+    <!-- Write Page -->
+    <string name="write_title">Write Data</string>
+    <string name="mode_text">Text</string>
+    <string name="mode_url">URL</string>
+    <string name="mode_file">File</string>
+    <string name="mode_custom">Custom</string>
+    <string name="input_text">Enter text content</string>
+    <string name="text_placeholder">Enter the text to write…</string>
+    <string name="encoding">Character Encoding</string>
+    <string name="input_url">Enter URL</string>
+    <string name="url_placeholder">https://example.com</string>
+    <string name="url_preview">URL Preview</string>
+    <string name="select_file">Select File</string>
+    <string name="write_options">Write Options</string>
+    <string name="lock_tag">Lock Tag</string>
+    <string name="lock_tag_desc">Tag cannot be written again after locking</string>
+    <string name="password_protect">Password Protection</string>
+    <string name="start_write">Start Writing</string>
+    <string name="writing">Writing…</string>
+    <string name="write_success">Write Successful!</string>
+    <string name="approach_tag">Hold your phone near the tag</string>
+    
+    <!-- History Page -->
+    <string name="history_title">History</string>
+    <string name="filter">Filter</string>
+    <string name="filter_all">All</string>
+    <string name="filter_read">Read</string>
+    <string name="filter_write">Write</string>
+    <string name="filter_today">Today</string>
+    <string name="filter_week">This Week</string>
+    <string name="filter_month">This Month</string>
+    <string name="no_history">No history records</string>
+    <string name="deleted">Deleted</string>
+    
+    <!-- Settings Page -->
+    <string name="settings_title">Settings</string>
+    <string name="nfc_status">NFC Status</string>
+    <string name="nfc_ready">Ready</string>
+    <string name="nfc_not_enabled">Not Enabled</string>
+    <string name="enable_nfc">Enable NFC</string>
+    <string name="permission_management">Permission Management</string>
+    <string name="nfc_permission">NFC Permission</string>
+    <string name="nfc_permission_desc">Allow app to use NFC</string>
+    <string name="storage_permission">Storage Permission</string>
+    <string name="storage_permission_desc">For saving history records</string>
+    <string name="notification_permission">Notification Permission</string>
+    <string name="notification_permission_desc">Receive read/write notifications</string>
+    <string name="app_settings">App Settings</string>
+    <string name="auto_read">Auto Read</string>
+    <string name="vibration_feedback">Vibration Feedback</string>
+    <string name="sound_feedback">Sound Feedback</string>
+    <string name="default_encoding">Default Encoding</string>
+    <string name="history_retention">History Retention Days</string>
+    <string name="about">About</string>
+    <string name="app_version">App Version</string>
+    <string name="build_date">Build Date</string>
+    <string name="developer">Developer</string>
+    <string name="help_feedback">Help &amp; Feedback</string>
+    <string name="clear_history">Clear History</string>
+    <string name="clear_history_confirm">Are you sure you want to clear all history? This action cannot be undone.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="rate_app">Rate This App</string>
+    <string name="share_app">Share App</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_read">Read</string>
+    <string name="nav_write">Write</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+    
+    <!-- Error Messages -->
+    <string name="error_nfc_not_supported">Device does not support NFC</string>
+    <string name="error_nfc_disabled">Please enable NFC first</string>
+    <string name="error_tag_not_writable">Tag is not writable</string>
+    <string name="error_capacity_exceeded">Data exceeds tag capacity</string>
+    <string name="error_connection_lost">Connection lost, please approach the tag again</string>
+    <string name="error_read_failed">Read failed</string>
+    <string name="error_write_failed">Write failed</string>
+    
+    <!-- Privacy & Legal -->
+    <string name="privacy_policy_url">https://nfctools.example.com/privacy</string>
+    <string name="terms_url">https://nfctools.example.com/terms</string>
+    <string name="data_collection_notice">This app collects minimal data for functionality. NFC tag data is stored locally on your device.</string>
+    <string name="no_account_required">No account required</string>
+    <string name="data_stored_locally">All data is stored locally on your device</string>
+    <string name="no_data_shared">No data is shared with third parties</string>
+</resources>

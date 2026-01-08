@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   备份规则配置
+   参考: https://developer.android.com/guide/topics/data/autobackup
+-->
+<full-backup-content>
+    <!-- 包含用户偏好设置 -->
+    <include domain="sharedpref" path="." />
+    
+    <!-- 排除数据库（历史记录可能包含敏感数据） -->
+    <exclude domain="database" path="." />
+    
+    <!-- 排除缓存 -->
+    <exclude domain="cache" path="." />
+</full-backup-content>
