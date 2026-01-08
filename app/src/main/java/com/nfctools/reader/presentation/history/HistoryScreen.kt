@@ -165,6 +165,7 @@ fun HistoryScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterBar(
     selectedType: HistoryType?,
