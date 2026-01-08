@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- NFC Icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,27C39.09,27 27,39.09 27,54C27,68.91 39.09,81 54,81C68.91,81 81,68.91 81,54C81,39.09 68.91,27 54,27ZM54,75.6C42.08,75.6 32.4,65.92 32.4,54C32.4,42.08 42.08,32.4 54,32.4C65.92,32.4 75.6,42.08 75.6,54C75.6,65.92 65.92,75.6 54,75.6Z"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,37.8C44.99,37.8 37.8,44.99 37.8,54C37.8,63.01 44.99,70.2 54,70.2C63.01,70.2 70.2,63.01 70.2,54C70.2,44.99 63.01,37.8 54,37.8ZM54,64.8C47.99,64.8 43.2,60.01 43.2,54C43.2,47.99 47.99,43.2 54,43.2C60.01,43.2 64.8,47.99 64.8,54C64.8,60.01 60.01,64.8 54,64.8Z"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,48.6C51.02,48.6 48.6,51.02 48.6,54C48.6,56.98 51.02,59.4 54,59.4C56.98,59.4 59.4,56.98 59.4,54C59.4,51.02 56.98,48.6 54,48.6Z"/>
+    
+</vector>

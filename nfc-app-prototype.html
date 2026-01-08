@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NFC读写工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --primary-light: #BBDEFB;
+            --accent-green: #4CAF50;
+            --accent-orange: #FF9800;
+            --accent-purple: #9C27B0;
+            --accent-gray: #757575;
+            --error: #F44336;
+            --success: #4CAF50;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --divider: #E0E0E0;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            max-width: 375px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 375px;
+            background: var(--surface);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            flex: 1;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+
+        /* Top App Bar */
+        .app-bar {
+            background: var(--primary);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .app-bar-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .app-bar-icon:active {
+            opacity: 0.7;
+        }
+
+        .app-bar-title {
+            flex: 1;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        /* Pages Container */
+        .pages-container {
+            position: relative;
+            min-height: calc(100vh - 120px);
+            overflow: hidden;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            min-height: calc(100vh - 120px);
+            background: var(--background);
+            padding-bottom: 80px;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: none;
+        }
+
+        .page.active {
+            transform: translateX(0);
+            display: block;
+        }
+
+        .page.exit-left {
+            transform: translateX(-100%);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* NFC Status Card */
+        .nfc-status-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: var(--error);
+            box-shadow: 0 0 10px var(--error);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+        }
+
+        .status-text h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .status-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Button */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.btn-secondary {
+            background: var(--accent-gray);
+        }
+
+        .btn.btn-danger {
+            background: var(--error);
+        }
+
+        .btn.btn-success {
+            background: var(--success);
+        }
+
+        /* Function Grid */
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .function-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .function-card:active {
+            transform: scale(0.95);
+        }
+
+        .function-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .function-card.blue::before { background: var(--primary); }
+        .function-card.green::before { background: var(--accent-green); }
+        .function-card.orange::before { background: var(--accent-orange); }
+        .function-card.purple::before { background: var(--accent-purple); }
+        .function-card.gray::before { background: var(--accent-gray); }
+        .function-card.dark-blue::before { background: var(--primary-dark); }
+
+        .function-card svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .function-card.blue svg { color: var(--primary); }
+        .function-card.green svg { color: var(--accent-green); }
+        .function-card.orange svg { color: var(--accent-orange); }
+        .function-card.purple svg { color: var(--accent-purple); }
+        .function-card.gray svg { color: var(--accent-gray); }
+        .function-card.dark-blue svg { color: var(--primary-dark); }
+
+        .function-card h3 {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .function-card p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Bottom Action Bar */
+        .bottom-action-bar {
+            position: fixed;
+            bottom: 64px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 343px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* NFC Scan Animation */
+        .scan-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 48px;
+        }
+
+        .nfc-icon-large {
+            width: 120px;
+            height: 120px;
+            color: var(--primary);
+            animation: scan-pulse 2s infinite;
+        }
+
+        @keyframes scan-pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+        }
+
+        .scan-status {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Tag Info Card */
+        .tag-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .tag-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .tag-info-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .tag-info-value {
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--divider);
+            margin: 0 16px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            padding: 16px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-block {
+            background: #263238;
+            color: #aed581;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+        }
+
+        /* Segmented Control */
+        .segmented-control {
+            display: flex;
+            background: var(--divider);
+            border-radius: 8px;
+            padding: 4px;
+            margin: 16px;
+        }
+
+        .segment {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .segment.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Form */
+        .form-group {
+            margin: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Switch */
+        .switch-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .switch-row:last-child {
+            border-bottom: none;
+        }
+
+        .switch-label {
+            font-size: 14px;
+        }
+
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--divider);
+            transition: .3s;
+            border-radius: 14px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--divider);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        /* Write Animation */
+        .write-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            padding: 48px;
+        }
+
+        .device-icon,
+        .tag-icon {
+            width: 60px;
+            height: 60px;
+            color: var(--primary);
+        }
+
+        .connection-line {
+            width: 40px;
+            height: 2px;
+            background: var(--primary);
+            animation: connect 1.5s infinite;
+        }
+
+        @keyframes connect {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* History List */
+        .history-list {
+            padding: 0 16px 16px;
+        }
+
+        .date-divider {
+            padding: 16px 0 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .history-item {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .history-item:active {
+            transform: scale(0.98);
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .history-icon.read {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .history-icon.write {
+            background: #C8E6C9;
+            color: var(--accent-green);
+        }
+
+        .history-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .history-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .history-preview {
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 32px;
+            text-align: center;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Snackbar */
+        .snackbar {
+            position: fixed;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #323232;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: transform 0.3s;
+            max-width: calc(100% - 32px);
+        }
+
+        .snackbar.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .snackbar.success {
+            background: var(--success);
+        }
+
+        .snackbar.error {
+            background: var(--error);
+        }
+
+        /* Dialog */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .dialog-overlay.show {
+            display: flex;
+        }
+
+        .dialog {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 16px;
+            max-width: 320px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .dialog-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .dialog-actions .btn {
+            padding: 8px 16px;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--surface);
+            padding: 16px;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            border-radius: 16px;
+            background: var(--background);
+            border: 1px solid var(--divider);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* File Preview */
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--primary);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .file-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--divider);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--divider);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar"></div>
+
+    <!-- Dialog -->
+    <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog">
+            <div class="dialog-title" id="dialogTitle"></div>
+            <div class="dialog-content" id="dialogContent"></div>
+            <div class="dialog-actions">
+                <button class="btn btn-secondary" onclick="hideDialog()">取消</button>
+                <button class="btn btn-danger" id="dialogConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pages Container -->
+    <div class="pages-container">
+        <!-- Page 1: Home -->
+        <div class="page active" id="homePage">
+            <div class="app-bar">
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <div class="app-bar-title">NFC读写工具</div>
+                <div class="status-indicator" id="nfcStatusDot"></div>
+            </div>
+
+            <div class="card nfc-status-card">
+                <div class="status-indicator" id="nfcStatusDot2"></div>
+                <div class="status-text">
+                    <h3>NFC状态</h3>
+                    <p id="nfcStatusText">已就绪</p>
+                </div>
+                <button class="btn" id="nfcToggleBtn" onclick="toggleNFC()">设置</button>
+            </div>
+
+            <div class="function-grid">
+                <div class="function-card blue" onclick="navigateTo('readPage')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                    <h3>读取标签</h3>
+                    <p>扫描NFC标签信息</p>
+                </div>
+
+                <div class="function-card green" onclick="navigateTo('writePage', 'text')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <h3>写入文本</h3>
+                    <p>向标签写入文本</p>
+                </div>
+
+                <div class="function-card orange" onclick="navigateTo('writePage', 'url')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                    <h3>写入URL</h3>
+                    <p>向标签写入链接</p>
+                </div>
+
+                <div class="function-card purple" onclick="navigateTo('writePage', 'file')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <h3>写入文件</h3>
+                    <p>向标签写入文件数据</p>
+                </div>
+
+                <div class="function-card gray" onclick="navigateTo('historyPage')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <h3>历史记录</h3>
+                    <p>查看操作历史</p>
+                </div>
+
+                <div class="function-card dark-blue" onclick="navigateTo('settingsPage')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <h3>应用设置</h3>
+                    <p>权限与配置</p>
+                </div>
+            </div>
+
+            <div class="bottom-action-bar">
+                将手机靠近NFC标签开始读取
+            </div>
+        </div>
+
+        <!-- Page 2: Read Tag -->
+        <div class="page" id="readPage">
+            <div class="app-bar">
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="navigateBack()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <div class="app-bar-title">读取标签</div>
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="shareData()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                </svg>
+            </div>
+
+            <div class="scan-animation" id="scanAnimation">
+                <svg class="nfc-icon-large" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                </svg>
+            </div>
+            <div class="scan-status" id="scanStatus">正在搜索标签...</div>
+
+            <div id="tagDataSection" style="display: none;">
+                <div class="card">
+                    <h3 style="margin-bottom: 16px;">标签信息</h3>
+                    <div class="tag-info-item">
+                        <span class="tag-info-label">标签ID</span>
+                        <div class="tag-info-value">
+                            <span id="tagId">04:8A:9F:3D</span>
+                            <svg class="copy-btn" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="copyToClipboard('04:8A:9F:3D')">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="tag-info-item">
+                        <span class="tag-info-label">标签类型</span>
+                        <span class="badge">NFC-A</span>
+                    </div>
+                    <div class="tag-info-item">
+                        <span class="tag-info-label">容量</span>
+                        <span class="tag-info-value">504 / 888 bytes</span>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(0)">文本</div>
+                    <div class="tab" onclick="switchTab(1)">十六进制</div>
+                    <div class="tab" onclick="switchTab(2)">技术详情</div>
+                </div>
+
+                <div class="tab-content active" id="tabContent0">
+                    <div class="card">
+                        <p style="line-height: 1.6;">Hello NFC World! 这是一个测试标签。</p>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tabContent1">
+                    <div class="code-block">48 65 6C 6C 6F 20 4E 46  43 20 57 6F 72 6C 64 21
+E8 BF 99 E6 98 AF E4 B8  80 E4 B8 AA E6 B5 8B E8
+AF 95 E6 A0 87 E7 AD BE  E3 80 82</div>
+                </div>
+
+                <div class="tab-content" id="tabContent2">
+                    <div class="card">
+                        <div class="tag-info-item">
+                            <span class="tag-info-label">ATQA</span>
+                            <span class="tag-info-value">0x0044</span>
+                        </div>
+                        <div class="tag-info-item">
+                            <span class="tag-info-label">SAK</span>
+                            <span class="tag-info-value">0x00</span>
+                        </div>
+                        <div class="tag-info-item">
+                            <span class="tag-info-label">技术支持</span>
+                            <span class="tag-info-value">NfcA, MifareUltralight, Ndef</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" onclick="saveToHistory()">
+                        <span>保存到历史</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="shareData()">
+                        <span>分享</span>
+                    </button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-danger" onclick="showEraseDialog()">
+                        <span>擦除标签</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: Write Data -->
+        <div class="page" id="writePage">
+            <div class="app-bar">
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="navigateBack()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <div class="app-bar-title">写入数据</div>
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="segmented-control">
+                <div class="segment active" onclick="switchWriteMode('text')">文本</div>
+                <div class="segment" onclick="switchWriteMode('url')">链接</div>
+                <div class="segment" onclick="switchWriteMode('file')">文件</div>
+                <div class="segment" onclick="switchWriteMode('custom')">自定义</div>
+            </div>
+
+            <!-- Text Mode -->
+            <div class="write-mode" id="writeMode-text">
+                <div class="form-group">
+                    <label class="form-label">输入文本内容</label>
+                    <textarea class="form-textarea" placeholder="请输入要写入的文本内容..." id="textInput">Hello NFC World!</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">字符编码</label>
+                    <select class="form-select">
+                        <option>UTF-8</option>
+                        <option>GBK</option>
+                        <option>ASCII</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- URL Mode -->
+            <div class="write-mode" id="writeMode-url" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">输入网址</label>
+                    <input type="url" class="form-input" placeholder="https://example.com" id="urlInput" value="https://www.google.com">
+                </div>
+                <div class="card" style="margin: 16px;">
+                    <h4 style="margin-bottom: 8px;">链接预览</h4>
+                    <p style="font-size: 14px; color: var(--text-secondary);">Google</p>
+                </div>
+            </div>
+
+            <!-- File Mode -->
+            <div class="write-mode" id="writeMode-file" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">选择文件</label>
+                    <button class="btn" onclick="selectFile()">
+                        <span>浏览文件</span>
+                    </button>
+                    <div class="file-preview" id="filePreview" style="display: none;">
+                        <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        <div class="file-info">
+                            <div class="file-name">document.pdf</div>
+                            <div class="file-meta">PDF文档 • 245 KB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Mode -->
+            <div class="write-mode" id="writeMode-custom" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">十六进制数据</label>
+                    <textarea class="form-textarea" placeholder="输入十六进制数据，如：48 65 6C 6C 6F" style="font-family: monospace;">48 65 6C 6C 6F</textarea>
+                </div>
+            </div>
+
+            <!-- Write Options -->
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">写入选项</h3>
+                <div class="switch-row">
+                    <span class="switch-label">锁定标签（防止修改）</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lockTag">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">写保护密码（可选）</label>
+                    <input type="password" class="form-input" placeholder="输入6位数字密码">
+                </div>
+            </div>
+
+            <!-- Write Animation -->
+            <div id="writeAnimationSection" style="display: none;">
+                <div class="write-animation">
+                    <svg class="device-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <div class="connection-line"></div>
+                    <svg class="tag-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                    </svg>
+                </div>
+                <div class="scan-status" id="writeStatus">请将手机靠近标签</div>
+                <div class="progress-bar" id="writeProgress" style="display: none; margin: 0 16px;">
+                    <div class="progress-fill" id="writeProgressFill"></div>
+                </div>
+            </div>
+
+            <!-- Write Button -->
+            <div class="button-group">
+                <button class="btn btn-success" id="writeBtn" onclick="startWrite()">
+                    <span>开始写入</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Page 4: History -->
+        <div class="page" id="historyPage">
+            <div class="app-bar">
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="navigateBack()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <div class="app-bar-title">历史记录</div>
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="toggleFilter()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+            </div>
+
+            <div class="filter-bar" id="filterBar" style="display: none;">
+                <div class="filter-row">
+                    <div class="filter-chip active" onclick="filterHistory('all')">全部</div>
+                    <div class="filter-chip" onclick="filterHistory('read')">读取</div>
+                    <div class="filter-chip" onclick="filterHistory('write')">写入</div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-chip active" onclick="filterTime('all')">全部时间</div>
+                    <div class="filter-chip" onclick="filterTime('today')">今天</div>
+                    <div class="filter-chip" onclick="filterTime('week')">本周</div>
+                    <div class="filter-chip" onclick="filterTime('month')">本月</div>
+                </div>
+            </div>
+
+            <div class="history-list">
+                <div class="date-divider">今天</div>
+                <div class="history-item" onclick="showHistoryDetail(0)">
+                    <div class="history-icon read">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-title">04:8A:9F:3D</div>
+                        <div class="history-preview">Hello NFC World! 这是一个测试标签。</div>
+                    </div>
+                    <div class="history-time">14:32</div>
+                </div>
+
+                <div class="history-item" onclick="showHistoryDetail(1)">
+                    <div class="history-icon write">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-title">04:2B:7C:1A</div>
+                        <div class="history-preview">https://www.google.com</div>
+                    </div>
+                    <div class="history-time">13:15</div>
+                </div>
+
+                <div class="date-divider">昨天</div>
+                <div class="history-item" onclick="showHistoryDetail(2)">
+                    <div class="history-icon read">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-title">04:F5:A3:8D</div>
+                        <div class="history-preview">会议室门禁卡</div>
+                    </div>
+                    <div class="history-time">16:45</div>
+                </div>
+
+                <div class="history-item" onclick="showHistoryDetail(3)">
+                    <div class="history-icon write">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-title">04:C8:5E:2F</div>
+                        <div class="history-preview">名片信息：张三 - 产品经理</div>
+                    </div>
+                    <div class="history-time">10:20</div>
+                </div>
+
+                <div class="date-divider">本周</div>
+                <div class="history-item" onclick="showHistoryDetail(4)">
+                    <div class="history-icon read">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-title">04:1A:6B:9C</div>
+                        <div class="history-preview">地铁卡余额：¥48.50</div>
+                    </div>
+                    <div class="history-time">1月5日</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 5: Settings -->
+        <div class="page" id="settingsPage">
+            <div class="app-bar">
+                <svg class="app-bar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="navigateBack()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <div class="app-bar-title">设置</div>
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="card nfc-status-card">
+                <div class="status-indicator" id="settingsNfcStatusDot"></div>
+                <div class="status-text">
+                    <h3>NFC状态</h3>
+                    <p id="settingsNfcStatusText">已就绪</p>
+                </div>
+                <button class="btn" onclick="toggleNFC()">开启NFC</button>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">权限管理</h3>
+                <div class="switch-row">
+                    <div>
+                        <div class="switch-label" style="font-weight: 500;">NFC权限</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">允许应用使用NFC功能</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-row">
+                    <div>
+                        <div class="switch-label" style="font-weight: 500;">存储权限</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">用于保存历史记录</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-row">
+                    <div>
+                        <div class="switch-label" style="font-weight: 500;">通知权限</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">接收读写操作通知</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">应用设置</h3>
+                <div class="switch-row">
+                    <span class="switch-label">自动读取</span>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">振动反馈</span>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">声音提示</span>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+                    <label class="form-label">默认编码</label>
+                    <select class="form-select">
+                        <option>UTF-8</option>
+                        <option>GBK</option>
+                        <option>ASCII</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+                    <label class="form-label">历史记录保留天数</label>
+                    <input type="number" class="form-input" value="30" min="1" max="365">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">关于应用</h3>
+                <div class="tag-info-item">
+                    <span class="tag-info-label">应用版本</span>
+                    <span class="tag-info-value">v1.0.0</span>
+                </div>
+                <div class="tag-info-item">
+                    <span class="tag-info-label">构建日期</span>
+                    <span class="tag-info-value">2025-01-07</span>
+                </div>
+                <div class="tag-info-item">
+                    <span class="tag-info-label">开发者</span>
+                    <span class="tag-info-value">NFC Tools Team</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="showHelp()">
+                    <span>帮助与反馈</span>
+                </button>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-danger" onclick="showClearHistoryDialog()">
+                    <span>清除历史记录</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="navigateTo('homePage')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>首页</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('readPage')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            <span>读取</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('writePage')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            <span>写入</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('historyPage')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>历史</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('settingsPage')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>设置</span>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentPage = 'homePage';
+        let nfcEnabled = true;
+        let currentWriteMode = 'text';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNFCStatus();
+            
+            // Simulate tag reading after 2 seconds on read page
+            if (window.location.hash === '#read') {
+                navigateTo('readPage');
+            }
+        });
+
+        // Navigation
+        function navigateTo(pageId, mode) {
+            const pages = document.querySelectorAll('.page');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Remove active class from all pages
+            pages.forEach(page => {
+                page.classList.remove('active');
+                page.classList.remove('exit-left');
+            });
+            
+            // Remove active class from all nav items
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // Activate target page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                setTimeout(() => {
+                    targetPage.classList.add('active');
+                }, 10);
+                
+                currentPage = pageId;
+                
+                // Update nav bar
+                const navIndex = {
+                    'homePage': 0,
+                    'readPage': 1,
+                    'writePage': 2,
+                    'historyPage': 3,
+                    'settingsPage': 4
+                };
+                
+                if (navIndex[pageId] !== undefined) {
+                    navItems[navIndex[pageId]].classList.add('active');
+                }
+                
+                // Page-specific initialization
+                if (pageId === 'readPage') {
+                    startTagScan();
+                } else if (pageId === 'writePage') {
+                    if (mode) {
+                        switchWriteMode(mode);
+                    }
+                    resetWritePage();
+                }
+            }
+        }
+
+        function navigateBack() {
+            navigateTo('homePage');
+        }
+
+        // NFC Status
+        function updateNFCStatus() {
+            const statusDots = document.querySelectorAll('.status-indicator');
+            const statusTexts = document.querySelectorAll('#nfcStatusText, #settingsNfcStatusText');
+            
+            statusDots.forEach(dot => {
+                if (nfcEnabled) {
+                    dot.classList.remove('offline');
+                } else {
+                    dot.classList.add('offline');
+                }
+            });
+            
+            statusTexts.forEach(text => {
+                text.textContent = nfcEnabled ? '已就绪' : '未开启';
+            });
+        }
+
+        function toggleNFC() {
+            nfcEnabled = !nfcEnabled;
+            updateNFCStatus();
+            showSnackbar(nfcEnabled ? 'NFC已开启' : 'NFC已关闭', 'success');
+        }
+
+        // Read Page Functions
+        function startTagScan() {
+            const scanAnimation = document.getElementById('scanAnimation');
+            const scanStatus = document.getElementById('scanStatus');
+            const tagDataSection = document.getElementById('tagDataSection');
+            
+            // Reset state
+            scanAnimation.style.display = 'flex';
+            scanStatus.textContent = '正在搜索标签...';
+            tagDataSection.style.display = 'none';
+            
+            // Simulate tag detection after 2 seconds
+            setTimeout(() => {
+                scanAnimation.style.display = 'none';
+                scanStatus.textContent = '读取成功！';
+                tagDataSection.style.display = 'block';
+                showSnackbar('成功读取NFC标签', 'success');
+            }, 2000);
+        }
+
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            tabContents.forEach((content, i) => {
+                if (i === index) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+
+        function copyToClipboard(text) {
+            // Simulate copy
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showSnackbar('已复制到剪贴板', 'success');
+            } catch (err) {
+                showSnackbar('复制失败', 'error');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        function saveToHistory() {
+            showSnackbar('已保存到历史记录', 'success');
+        }
+
+        function shareData() {
+            showSnackbar('分享功能已触发', 'success');
+        }
+
+        function showEraseDialog() {
+            showDialog('擦除标签', '确定要擦除此标签的所有数据吗？此操作不可撤销。', () => {
+                showSnackbar('标签已擦除', 'success');
+                setTimeout(() => {
+                    navigateBack();
+                }, 1500);
+            });
+        }
+
+        // Write Page Functions
+        function switchWriteMode(mode) {
+            currentWriteMode = mode;
+            
+            // Update segments
+            const segments = document.querySelectorAll('.segment');
+            segments.forEach((seg, index) => {
+                const modes = ['text', 'url', 'file', 'custom'];
+                if (modes[index] === mode) {
+                    seg.classList.add('active');
+                } else {
+                    seg.classList.remove('active');
+                }
+            });
+            
+            // Show/hide mode sections
+            const modeSections = document.querySelectorAll('.write-mode');
+            modeSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            const targetSection = document.getElementById('writeMode-' + mode);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+        }
+
+        function selectFile() {
+            // Simulate file selection
+            const filePreview = document.getElementById('filePreview');
+            filePreview.style.display = 'flex';
+            showSnackbar('文件已选择', 'success');
+        }
+
+        function resetWritePage() {
+            const writeAnimationSection = document.getElementById('writeAnimationSection');
+            const writeBtn = document.getElementById('writeBtn');
+            const writeProgress = document.getElementById('writeProgress');
+            
+            writeAnimationSection.style.display = 'none';
+            writeBtn.innerHTML = '<span>开始写入</span>';
+            writeBtn.disabled = false;
+            writeProgress.style.display = 'none';
+        }
+
+        function startWrite() {
+            const writeBtn = document.getElementById('writeBtn');
+            const writeAnimationSection = document.getElementById('writeAnimationSection');
+            const writeStatus = document.getElementById('writeStatus');
+            const writeProgress = document.getElementById('writeProgress');
+            const writeProgressFill = document.getElementById('writeProgressFill');
+            
+            // Show animation
+            writeAnimationSection.style.display = 'block';
+            writeStatus.textContent = '请将手机靠近标签';
+            writeBtn.innerHTML = '<span>请靠近标签...</span>';
+            writeBtn.disabled = true;
+            
+            // Simulate tag approach after 2 seconds
+            setTimeout(() => {
+                writeStatus.textContent = '正在写入...';
+                writeProgress.style.display = 'block';
+                
+                // Animate progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    writeProgressFill.style.width = progress + '%';
+                    
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        
+                        // Write complete
+                        setTimeout(() => {
+                            writeStatus.textContent = '写入成功！';
+                            writeBtn.innerHTML = '<span>写入成功</span>';
+                            writeBtn.classList.remove('btn-success');
+                            writeBtn.classList.add('btn-success');
+                            showSnackbar('数据已成功写入标签', 'success');
+                            
+                            // Reset after 2 seconds
+                            setTimeout(() => {
+                                navigateBack();
+                            }, 2000);
+                        }, 500);
+                    }
+                }, 150);
+            }, 2000);
+        }
+
+        // History Page Functions
+        function toggleFilter() {
+            const filterBar = document.getElementById('filterBar');
+            if (filterBar.style.display === 'none' || filterBar.style.display === '') {
+                filterBar.style.display = 'block';
+            } else {
+                filterBar.style.display = 'none';
+            }
+        }
+
+        function filterHistory(type) {
+            const chips = document.querySelectorAll('.filter-row:first-child .filter-chip');
+            chips.forEach((chip, index) => {
+                chip.classList.remove('active');
+                if ((type === 'all' && index === 0) ||
+                    (type === 'read' && index === 1) ||
+                    (type === 'write' && index === 2)) {
+                    chip.classList.add('active');
+                }
+            });
+            showSnackbar('筛选已应用：' + type, 'success');
+        }
+
+        function filterTime(time) {
+            const chips = document.querySelectorAll('.filter-row:last-child .filter-chip');
+            chips.forEach((chip, index) => {
+                chip.classList.remove('active');
+                if ((time === 'all' && index === 0) ||
+                    (time === 'today' && index === 1) ||
+                    (time === 'week' && index === 2) ||
+                    (time === 'month' && index === 3)) {
+                    chip.classList.add('active');
+                }
+            });
+            showSnackbar('时间筛选：' + time, 'success');
+        }
+
+        function showHistoryDetail(index) {
+            showSnackbar('历史详情 #' + index, 'success');
+        }
+
+        // Settings Page Functions
+        function showHelp() {
+            showSnackbar('帮助文档已打开', 'success');
+        }
+
+        function showClearHistoryDialog() {
+            showDialog('清除历史记录', '确定要清除所有历史记录吗？此操作不可撤销。', () => {
+                showSnackbar('历史记录已清除', 'success');
+            });
+        }
+
+        // UI Components
+        function showSnackbar(message, type = '') {
+            const snackbar = document.getElementById('snackbar');
+            snackbar.textContent = message;
+            snackbar.className = 'snackbar show';
+            
+            if (type === 'success') {
+                snackbar.classList.add('success');
+            } else if (type === 'error') {
+                snackbar.classList.add('error');
+            }
+            
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+            }, 3000);
+        }
+
+        function showDialog(title, content, onConfirm) {
+            const overlay = document.getElementById('dialogOverlay');
+            const dialogTitle = document.getElementById('dialogTitle');
+            const dialogContent = document.getElementById('dialogContent');
+            const confirmBtn = document.getElementById('dialogConfirm');
+            
+            dialogTitle.textContent = title;
+            dialogContent.textContent = content;
+            overlay.classList.add('show');
+            
+            // Remove old listener and add new one
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            document.getElementById('dialogConfirm').onclick = function() {
+                hideDialog();
+                if (onConfirm) onConfirm();
+            };
+        }
+
+        function hideDialog() {
+            const overlay = document.getElementById('dialogOverlay');
+            overlay.classList.remove('show');
+        }
+
+        // Ripple Effect
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('.btn, .function-card, .history-item');
+            if (target) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = target.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                target.style.position = 'relative';
+                target.style.overflow = 'hidden';
+                target.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+
+        // Close dialog when clicking overlay
+        document.getElementById('dialogOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDialog();
+            }
+        });
+    </script>
+</body>
+</html>

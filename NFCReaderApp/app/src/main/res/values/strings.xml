@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NFC读写工具</string>
+    
+    <!-- 主页 -->
+    <string name="home_title">NFC读写工具</string>
+    <string name="nfc_status_enabled">NFC已开启</string>
+    <string name="nfc_status_disabled">NFC未开启</string>
+    <string name="nfc_hint">将手机靠近NFC标签开始读取</string>
+    
+    <!-- 功能卡片 -->
+    <string name="func_read_tag">读取标签</string>
+    <string name="func_read_desc">扫描NFC标签信息</string>
+    <string name="func_write_text">写入文本</string>
+    <string name="func_write_text_desc">向标签写入文本</string>
+    <string name="func_write_url">写入URL</string>
+    <string name="func_write_url_desc">向标签写入链接</string>
+    <string name="func_write_file">写入文件</string>
+    <string name="func_write_file_desc">向标签写入文件数据</string>
+    <string name="func_history">历史记录</string>
+    <string name="func_history_desc">查看操作历史</string>
+    <string name="func_settings">应用设置</string>
+    <string name="func_settings_desc">权限与配置</string>
+    
+    <!-- 读取页 -->
+    <string name="read_title">读取标签</string>
+    <string name="scanning">正在搜索标签…</string>
+    <string name="tag_info">标签信息</string>
+    <string name="tag_id">标签ID</string>
+    <string name="tag_type">标签类型</string>
+    <string name="tag_capacity">容量</string>
+    <string name="tab_text">文本</string>
+    <string name="tab_hex">十六进制</string>
+    <string name="tab_tech">技术详情</string>
+    <string name="save_to_history">保存到历史</string>
+    <string name="share">分享</string>
+    <string name="erase_tag">擦除标签</string>
+    <string name="copy">复制</string>
+    <string name="copied">已复制到剪贴板</string>
+    
+    <!-- 写入页 -->
+    <string name="write_title">写入数据</string>
+    <string name="mode_text">文本</string>
+    <string name="mode_url">链接</string>
+    <string name="mode_file">文件</string>
+    <string name="mode_custom">自定义</string>
+    <string name="input_text">输入文本内容</string>
+    <string name="text_placeholder">请输入要写入的文本内容…</string>
+    <string name="encoding">字符编码</string>
+    <string name="input_url">输入网址</string>
+    <string name="url_placeholder">https://example.com</string>
+    <string name="url_preview">链接预览</string>
+    <string name="select_file">选择文件</string>
+    <string name="write_options">写入选项</string>
+    <string name="lock_tag">锁定标签</string>
+    <string name="lock_tag_desc">锁定后标签将无法再次写入</string>
+    <string name="password_protect">密码保护</string>
+    <string name="start_write">开始写入</string>
+    <string name="writing">正在写入…</string>
+    <string name="write_success">写入成功！</string>
+    <string name="approach_tag">请将手机靠近标签</string>
+    
+    <!-- 历史记录页 -->
+    <string name="history_title">历史记录</string>
+    <string name="filter">筛选</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_read">读取</string>
+    <string name="filter_write">写入</string>
+    <string name="filter_today">今天</string>
+    <string name="filter_week">本周</string>
+    <string name="filter_month">本月</string>
+    <string name="no_history">暂无历史记录</string>
+    <string name="deleted">已删除</string>
+    
+    <!-- 设置页 -->
+    <string name="settings_title">设置</string>
+    <string name="nfc_status">NFC状态</string>
+    <string name="nfc_ready">已就绪</string>
+    <string name="nfc_not_enabled">未开启</string>
+    <string name="enable_nfc">开启NFC</string>
+    <string name="permission_management">权限管理</string>
+    <string name="nfc_permission">NFC权限</string>
+    <string name="nfc_permission_desc">允许应用使用NFC功能</string>
+    <string name="storage_permission">存储权限</string>
+    <string name="storage_permission_desc">用于保存历史记录</string>
+    <string name="notification_permission">通知权限</string>
+    <string name="notification_permission_desc">接收读写操作通知</string>
+    <string name="app_settings">应用设置</string>
+    <string name="auto_read">自动读取</string>
+    <string name="vibration_feedback">振动反馈</string>
+    <string name="sound_feedback">声音提示</string>
+    <string name="default_encoding">默认编码</string>
+    <string name="history_retention">历史记录保留天数</string>
+    <string name="about">关于应用</string>
+    <string name="app_version">应用版本</string>
+    <string name="build_date">构建日期</string>
+    <string name="developer">开发者</string>
+    <string name="help_feedback">帮助与反馈</string>
+    <string name="clear_history">清除历史记录</string>
+    <string name="clear_history_confirm">确定要清除所有历史记录吗？此操作不可撤销。</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    
+    <!-- 底部导航 -->
+    <string name="nav_home">首页</string>
+    <string name="nav_read">读取</string>
+    <string name="nav_write">写入</string>
+    <string name="nav_history">历史</string>
+    <string name="nav_settings">设置</string>
+    
+    <!-- 错误信息 -->
+    <string name="error_nfc_not_supported">设备不支持NFC</string>
+    <string name="error_nfc_disabled">请先开启NFC功能</string>
+    <string name="error_tag_not_writable">标签不可写</string>
+    <string name="error_capacity_exceeded">数据超出标签容量</string>
+    <string name="error_connection_lost">连接中断，请重新靠近标签</string>
+    <string name="error_read_failed">读取失败</string>
+    <string name="error_write_failed">写入失败</string>
+</resources>
