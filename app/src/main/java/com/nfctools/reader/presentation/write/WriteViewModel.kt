@@ -226,6 +226,20 @@ class WriteViewModel @Inject constructor(
     }
     
     fun resetState() {
+        // 只重置写入状态，保留用户输入的内容
+        _uiState.update {
+            it.copy(
+                isWaitingForTag = false,
+                isWriting = false,
+                writeStatus = "",
+                writeProgress = 0f,
+                writeSuccess = false
+            )
+        }
+    }
+    
+    fun clearAndReset() {
+        // 完全清空所有内容并重置状态
         _uiState.update {
             WriteUiState(
                 encoding = preferences.value?.defaultEncoding ?: Encoding.UTF_8

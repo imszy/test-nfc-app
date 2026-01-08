@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -149,45 +148,35 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Column(
+            // NFC状态卡片
+            NFCStatusCard(
+                enabled = uiState.nfcEnabled,
+                onToggle = { viewModel.toggleNFC() }
+            )
+            
+            // 功能网格 (2列)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(Spacing.large),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.large),
+                verticalArrangement = Arrangement.spacedBy(Spacing.large),
                 modifier = Modifier.fillMaxSize()
             ) {
-                // NFC状态卡片
-                NFCStatusCard(
-                    enabled = uiState.nfcEnabled,
-                    onToggle = { viewModel.toggleNFC() }
-                )
-                
-                // 功能网格 (2列)
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(Spacing.large),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.large),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.large),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(functionCards) { card ->
-                        FunctionCard(
-                            icon = card.icon,
-                            title = card.title,
-                            description = card.description,
-                            color = card.color,
-                            onClick = { navController.navigate(card.route) }
-                        )
-                    }
+                items(functionCards) { card ->
+                    FunctionCard(
+                        icon = card.icon,
+                        title = card.title,
+                        description = card.description,
+                        color = card.color,
+                        onClick = { navController.navigate(card.route) }
+                    )
                 }
             }
-            
-            // 底部提示 - 固定在底部
-            BottomActionBar(
-                text = "将手机靠近NFC标签开始读取",
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
         }
     }
 }
