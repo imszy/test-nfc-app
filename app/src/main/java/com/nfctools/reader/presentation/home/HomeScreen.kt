@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -81,17 +85,24 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     
     LaunchedEffect(Unit) {
         viewModel.checkNFCStatus()
     }
     
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("NFC读写工具") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { 
+                        scope.launch {
+                            snackbarHostState.showSnackbar("菜单功能即将上线")
+                        }
+                    }) {
                         Icon(Icons.Filled.Menu, contentDescription = "菜单")
                     }
                 },
@@ -138,39 +149,44 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // NFC状态卡片
-            NFCStatusCard(
-                enabled = uiState.nfcEnabled,
-                onToggle = { viewModel.toggleNFC() }
-            )
-            
-            // 功能网格 (2列)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(Spacing.large),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.large),
-                verticalArrangement = Arrangement.spacedBy(Spacing.large),
-                modifier = Modifier.weight(1f)
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(functionCards) { card ->
-                    FunctionCard(
-                        icon = card.icon,
-                        title = card.title,
-                        description = card.description,
-                        color = card.color,
-                        onClick = { navController.navigate(card.route) }
-                    )
+                // NFC状态卡片
+                NFCStatusCard(
+                    enabled = uiState.nfcEnabled,
+                    onToggle = { viewModel.toggleNFC() }
+                )
+                
+                // 功能网格 (2列)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(Spacing.large),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.large),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.large),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(functionCards) { card ->
+                        FunctionCard(
+                            icon = card.icon,
+                            title = card.title,
+                            description = card.description,
+                            color = card.color,
+                            onClick = { navController.navigate(card.route) }
+                        )
+                    }
                 }
             }
             
-            // 底部提示
+            // 底部提示 - 固定在底部
             BottomActionBar(
-                text = "将手机靠近NFC标签开始读取"
+                text = "将手机靠近NFC标签开始读取",
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     }

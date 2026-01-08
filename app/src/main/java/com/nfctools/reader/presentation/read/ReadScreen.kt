@@ -199,7 +199,6 @@ private fun TagDataView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .padding(Spacing.large)
         ) {
             when (selectedTab) {
