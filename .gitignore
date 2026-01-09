@@ -101,3 +101,5 @@ keystore.properties
 # Google Play upload key
 upload-keystore.jks
 play-store-credentials.json
+
+build-output.txt

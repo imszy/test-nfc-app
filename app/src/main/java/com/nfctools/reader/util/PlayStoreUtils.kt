@@ -7,6 +7,10 @@ import android.content.Intent
 import android.net.Uri
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.tasks.await
+import com.google.android.gms.tasks.Task
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Google Play 商店相关工具类
