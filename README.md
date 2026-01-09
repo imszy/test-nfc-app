@@ -152,3 +152,13 @@ MIT License
 - **版本**: 1.0.0
 - **构建日期**: 2025-01-08
 - **开发者**: NFC Tools Team
+
+
+## 上传到 Google Play
+推荐上传 AAB 格式：
+登录 Google Play Console
+创建应用或选择现有应用
+进入 Production > Create new release
+上传 NFC-Reader-1.0.0-release.aab
+填写发布说明
+提交审核
